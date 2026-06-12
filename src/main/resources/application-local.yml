@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/authdb
+    username: auth
+    password: auth
+  jpa:
+    show-sql: true
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: http://localhost:9000
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
