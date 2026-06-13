@@ -9,4 +9,4 @@ spring:
 logging:
   level:
     root: WARN
-    com.mortenm12.authservice: INFO
+    dk.tinker.authservice: INFO
