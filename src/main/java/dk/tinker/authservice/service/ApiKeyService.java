@@ -3,9 +3,11 @@ package dk.tinker.authservice.service;
 import dk.tinker.authservice.api.dto.apikey.ApiKeyCreatedResponse;
 import dk.tinker.authservice.api.dto.apikey.ApiKeyResponse;
 import dk.tinker.authservice.api.dto.apikey.CreateApiKeyRequest;
+import dk.tinker.authservice.api.dto.apikey.ValidateApiKeyResponse;
 import dk.tinker.authservice.domain.ApiKey;
 import dk.tinker.authservice.domain.Organization;
 import dk.tinker.authservice.domain.User;
+import dk.tinker.authservice.event.TokenEventPublisher;
 import dk.tinker.authservice.exception.ResourceNotFoundException;
 import dk.tinker.authservice.repository.ApiKeyRepository;
 import dk.tinker.authservice.repository.OrganizationRepository;
@@ -36,13 +38,16 @@ public class ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final OrganizationRepository organizationRepository;
     private final UserRepository userRepository;
+    private final TokenEventPublisher tokenEventPublisher;
 
     public ApiKeyService(ApiKeyRepository apiKeyRepository,
             OrganizationRepository organizationRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            TokenEventPublisher tokenEventPublisher) {
         this.apiKeyRepository = apiKeyRepository;
         this.organizationRepository = organizationRepository;
         this.userRepository = userRepository;
+        this.tokenEventPublisher = tokenEventPublisher;
     }
 
     public List<ApiKeyResponse> findAll() {
@@ -75,10 +80,32 @@ public class ApiKeyService {
 
     @Transactional
     public void revoke(UUID id) {
-        if (!apiKeyRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ApiKey", id);
-        }
-        apiKeyRepository.deleteById(id);
+        ApiKey apiKey = apiKeyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ApiKey", id));
+        String keyHash = apiKey.getKeyHash();
+        apiKeyRepository.delete(apiKey);
+        tokenEventPublisher.publishApiKeyRevoked(keyHash);
+    }
+
+    public ValidateApiKeyResponse validateForExternal(String rawKey) {
+        String hash = sha256Hex(rawKey);
+        return apiKeyRepository.findByKeyHash(hash)
+                .map(apiKey -> {
+                    if (apiKey.isExpired()) {
+                        return new ValidateApiKeyResponse(false, hash, null, null, List.of(), null);
+                    }
+                    UUID userId = apiKey.getUser() != null ? apiKey.getUser().getId() : null;
+                    UUID orgId = apiKey.getOrganization() != null ? apiKey.getOrganization().getId() : null;
+                    return new ValidateApiKeyResponse(
+                            true,
+                            hash,
+                            userId,
+                            orgId,
+                            apiKey.getScopesAsList(),
+                            apiKey.getExpiresAt()
+                    );
+                })
+                .orElse(new ValidateApiKeyResponse(false, hash, null, null, List.of(), null));
     }
 
     @Transactional

@@ -27,21 +27,24 @@ repositories {
 }
 
 dependencies {
-    // ── Core ─────────────────────────────────────────────────────────────────
+    // ── Core ───────────────────────────────────────────────────────────────────────
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    // ── Data ─────────────────────────────────────────────────────────────────
+    // ── Data ───────────────────────────────────────────────────────────────────────
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
 
-    // ── Security ─────────────────────────────────────────────────────────────
+    // ── Security ─────────────────────────────────────────────────────────────────
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
 
-    // ── Observability ─────────────────────────────────────────────────────────
+    // ── Messaging ─────────────────────────────────────────────────────────────────
+    implementation("org.springframework.boot:spring-boot-starter-amqp")
+
+    // ── Observability ──────────────────────────────────────────────────────────────
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.micrometer:micrometer-tracing-bridge-otel")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
@@ -49,15 +52,15 @@ dependencies {
     // ── API Documentation ─────────────────────────────────────────────────────
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 
-    // ── Resilience ────────────────────────────────────────────────────────────
+    // ── Resilience ────────────────────────────────────────────────────────────────
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.3.0")
     implementation("io.github.resilience4j:resilience4j-micrometer:2.3.0")
 
-    // ── Dev Tools ────────────────────────────────────────────────────────────
+    // ── Dev Tools ────────────────────────────────────────────────────────────────
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    // ── Testing ───────────────────────────────────────────────────────────────
+    // ── Testing ───────────────────────────────────────────────────────────────────
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.testcontainers:junit-jupiter")
@@ -77,4 +80,3 @@ tasks.withType<Test> {
 tasks.named<BootJar>("bootJar") {
     archiveFileName.set("app.jar")
 }
-

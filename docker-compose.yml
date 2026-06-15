@@ -16,6 +16,17 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     ports:
@@ -28,8 +39,12 @@ services:
       ISSUER_URI: http://localhost:9000
       CLIENT_ID: internal-client
       CLIENT_SECRET: change-me-in-production
+      RABBITMQ_HOST: rabbitmq
+      INTERNAL_SECRET: dev-secret-change-in-production
     depends_on:
       db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   prometheus:

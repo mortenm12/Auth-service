@@ -25,6 +25,15 @@ spring:
       authorizationserver:
         issuer: ${ISSUER_URI:http://localhost:9000}
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+internal:
+  secret: ${INTERNAL_SECRET:dev-secret-change-in-production}
+
 management:
   endpoints:
     web:
