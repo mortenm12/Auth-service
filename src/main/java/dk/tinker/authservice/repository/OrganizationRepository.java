@@ -2,6 +2,8 @@ package dk.tinker.authservice.repository;
 
 import dk.tinker.authservice.domain.Organization;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +15,9 @@ public interface OrganizationRepository extends JpaRepository<Organization, UUID
 
     boolean existsBySlug(String slug);
 
+    @Query("SELECT o FROM Organization o WHERE o.parent IS NULL")
     List<Organization> findByParentIsNull();
 
-    List<Organization> findByParentId(UUID parentId);
+    @Query("SELECT o FROM Organization o WHERE o.parent.id = :parentId")
+    List<Organization> findByParentId(@Param("parentId") UUID parentId);
 }

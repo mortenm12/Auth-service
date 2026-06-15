@@ -11,13 +11,21 @@ import java.util.UUID;
 
 public interface UserOrganizationRoleRepository extends JpaRepository<UserOrganizationRole, UUID> {
 
-    List<UserOrganizationRole> findByUserId(UUID userId);
+    @Query("SELECT m FROM UserOrganizationRole m WHERE m.user.id = :userId")
+    List<UserOrganizationRole> findByUserId(@Param("userId") UUID userId);
 
-    List<UserOrganizationRole> findByOrganizationId(UUID organizationId);
+    @Query("SELECT m FROM UserOrganizationRole m WHERE m.organization.id = :organizationId")
+    List<UserOrganizationRole> findByOrganizationId(@Param("organizationId") UUID organizationId);
 
-    Optional<UserOrganizationRole> findByUserIdAndOrganizationId(UUID userId, UUID organizationId);
+    @Query("SELECT m FROM UserOrganizationRole m WHERE m.user.id = :userId AND m.organization.id = :organizationId")
+    Optional<UserOrganizationRole> findByUserIdAndOrganizationId(
+            @Param("userId") UUID userId,
+            @Param("organizationId") UUID organizationId);
 
-    boolean existsByUserIdAndOrganizationId(UUID userId, UUID organizationId);
+    @Query("SELECT COUNT(m) > 0 FROM UserOrganizationRole m WHERE m.user.id = :userId AND m.organization.id = :organizationId")
+    boolean existsByUserIdAndOrganizationId(
+            @Param("userId") UUID userId,
+            @Param("organizationId") UUID organizationId);
 
     @Query("SELECT m FROM UserOrganizationRole m JOIN FETCH m.user JOIN FETCH m.role WHERE m.organization.id = :orgId")
     List<UserOrganizationRole> findByOrganizationIdWithDetails(@Param("orgId") UUID orgId);
