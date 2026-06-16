@@ -1,6 +1,8 @@
 package dk.tinker.authservice.config;
 
+import dk.tinker.authservice.event.TokenInvalidationPublisher;
 import dk.tinker.authservice.security.ApiKeyAuthenticationFilter;
+import dk.tinker.authservice.security.LogoutTokenInvalidationHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -64,6 +66,8 @@ public class SecurityConfig {
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/api/v1/tokens/validate")
+                                .hasAnyAuthority("SCOPE_read", "SCOPE_admin")
                         .requestMatchers(HttpMethod.GET, "/api/**")
                                 .hasAnyAuthority("SCOPE_read", "SCOPE_admin")
                         .requestMatchers("/api/**").hasAuthority("SCOPE_admin")
@@ -80,13 +84,17 @@ public class SecurityConfig {
 
     @Bean
     @Order(3)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http,
+            TokenInvalidationPublisher invalidationPublisher) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(Customizer.withDefaults())
+                .logout(logout -> logout
+                        .logoutSuccessHandler(new LogoutTokenInvalidationHandler(invalidationPublisher))
+                )
                 .build();
     }
 
