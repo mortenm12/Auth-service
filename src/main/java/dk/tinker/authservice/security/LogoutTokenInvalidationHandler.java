@@ -1,6 +1,7 @@
 package dk.tinker.authservice.security;
 
 import dk.tinker.authservice.event.TokenInvalidationPublisher;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
@@ -23,7 +24,7 @@ public class LogoutTokenInvalidationHandler extends SimpleUrlLogoutSuccessHandle
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
-            Authentication authentication) throws IOException {
+            Authentication authentication) throws IOException, ServletException {
         if (authentication != null) {
             publisher.publishSubjectInvalidated(authentication.getName());
         }
