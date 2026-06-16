@@ -41,6 +41,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
 
+    // ── Messaging ────────────────────────────────────────────────────────────
+    implementation("org.springframework.boot:spring-boot-starter-amqp")
+
     // ── Observability ─────────────────────────────────────────────────────────
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.micrometer:micrometer-tracing-bridge-otel")
@@ -77,4 +80,3 @@ tasks.withType<Test> {
 tasks.named<BootJar>("bootJar") {
     archiveFileName.set("app.jar")
 }
-
