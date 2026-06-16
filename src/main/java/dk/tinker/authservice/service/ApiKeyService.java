@@ -6,6 +6,7 @@ import dk.tinker.authservice.api.dto.apikey.CreateApiKeyRequest;
 import dk.tinker.authservice.domain.ApiKey;
 import dk.tinker.authservice.domain.Organization;
 import dk.tinker.authservice.domain.User;
+import dk.tinker.authservice.event.TokenInvalidationPublisher;
 import dk.tinker.authservice.exception.ResourceNotFoundException;
 import dk.tinker.authservice.repository.ApiKeyRepository;
 import dk.tinker.authservice.repository.OrganizationRepository;
@@ -36,13 +37,16 @@ public class ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final OrganizationRepository organizationRepository;
     private final UserRepository userRepository;
+    private final TokenInvalidationPublisher invalidationPublisher;
 
     public ApiKeyService(ApiKeyRepository apiKeyRepository,
             OrganizationRepository organizationRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            TokenInvalidationPublisher invalidationPublisher) {
         this.apiKeyRepository = apiKeyRepository;
         this.organizationRepository = organizationRepository;
         this.userRepository = userRepository;
+        this.invalidationPublisher = invalidationPublisher;
     }
 
     public List<ApiKeyResponse> findAll() {
@@ -75,10 +79,11 @@ public class ApiKeyService {
 
     @Transactional
     public void revoke(UUID id) {
-        if (!apiKeyRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ApiKey", id);
-        }
+        ApiKey apiKey = apiKeyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ApiKey", id));
+        String keyHash = apiKey.getKeyHash();
         apiKeyRepository.deleteById(id);
+        invalidationPublisher.publishApiKeyInvalidated(keyHash);
     }
 
     @Transactional
@@ -87,6 +92,7 @@ public class ApiKeyService {
         ApiKey apiKey = apiKeyRepository.findByKeyHash(hash)
                 .orElseThrow(() -> new BadCredentialsException("Invalid API key"));
         if (apiKey.isExpired()) {
+            invalidationPublisher.publishApiKeyInvalidated(apiKey.getKeyHash());
             throw new BadCredentialsException("API key expired");
         }
         apiKey.recordUsage();
