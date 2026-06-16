@@ -6,4 +6,4 @@ import jakarta.validation.constraints.NotNull;
 public record ValidateTokenRequest(
         @NotBlank String token,
         @NotNull TokenTypeDto tokenType
-) {}
+) { }

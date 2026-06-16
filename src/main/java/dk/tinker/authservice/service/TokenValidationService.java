@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 public class TokenValidationService {
 
-    private static final Logger log = LoggerFactory.getLogger(TokenValidationService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TokenValidationService.class);
 
     private final JwtDecoder jwtDecoder;
     private final ApiKeyService apiKeyService;
@@ -42,7 +42,7 @@ public class TokenValidationService {
             return new ValidationResponse(true, subject, List.of(),
                     scopes != null ? scopes : List.of(), expiresAt);
         } catch (JwtException e) {
-            log.debug("JWT validation failed: {}", e.getMessage());
+            LOG.debug("JWT validation failed: {}", e.getMessage());
             return ValidationResponse.invalid();
         }
     }
@@ -56,7 +56,7 @@ public class TokenValidationService {
                     .toList();
             return new ValidationResponse(true, auth.getName(), List.of(), scopes, null);
         } catch (Exception e) {
-            log.debug("API key validation failed: {}", e.getMessage());
+            LOG.debug("API key validation failed: {}", e.getMessage());
             return ValidationResponse.invalid();
         }
     }

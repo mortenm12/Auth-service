@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenInvalidationPublisher {
 
-    private static final Logger log = LoggerFactory.getLogger(TokenInvalidationPublisher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TokenInvalidationPublisher.class);
 
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
@@ -32,9 +32,9 @@ public class TokenInvalidationPublisher {
         try {
             String json = objectMapper.writeValueAsString(event);
             rabbitTemplate.convertAndSend(RabbitMqConfig.TOKEN_INVALIDATION_EXCHANGE, "", json);
-            log.debug("Published invalidation event: {}", event.type());
+            LOG.debug("Published invalidation event: {}", event.type());
         } catch (Exception e) {
-            log.error("Failed to publish token invalidation event", e);
+            LOG.error("Failed to publish token invalidation event", e);
         }
     }
 }

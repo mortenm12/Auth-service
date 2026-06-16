@@ -5,5 +5,6 @@ package dk.tinker.authservice.api;
  * Microservices using permission-lib receive events automatically through their AMQP listener.
  */
 final class TokenEventController {
-    private TokenEventController() {}
+
+    private TokenEventController() { }
 }
