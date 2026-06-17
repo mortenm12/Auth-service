@@ -28,6 +28,10 @@ public class TokenInvalidationPublisher {
         publish(TokenInvalidationEvent.apiKeyInvalidated(keyHash));
     }
 
+    public void publishResourcePermissionChanged(String subject, String resourceType, String resourceId) {
+        publish(TokenInvalidationEvent.resourcePermissionChanged(subject, resourceType, resourceId));
+    }
+
     private void publish(TokenInvalidationEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
